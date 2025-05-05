@@ -1,0 +1,83 @@
+#define RELAY 0  
+
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
+WiFiServer server(80); 
+
+//===WiFI============================== 
+const char* ssid = "";  
+const char* password = "";
+
+
+
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  server.begin();
+  Serial.print("Got IP: ");  Serial.print(WiFi.localIP());
+  Serial.print("\n");
+  
+
+  pinMode(RELAY,OUTPUT);                      // Указываем вывод RELAY как выход
+  digitalWrite(RELAY, LOW);                   // Устанавливаем RELAY в LOW (0В)
+  
+}
+
+void loop() {
+ WiFiClient client = server.available();    // Получаем данные, посылаемые клиентом 
+  if (!client)                                
+  {
+    return;
+  }
+  Serial.println("new client");               // Отправка "new client"
+  while(!client.available())                  // Пока есть соединение с клиентом 
+  {
+    delay(1);                                 // пауза 1 мс
+  }
+ 
+  String request = client.readStringUntil('\r');
+  Serial.println(request);
+  client.flush();
+ 
+  int value = LOW;
+  if (request.indexOf("/RELAY=ON") != -1)  
+  {
+    Serial.println("RELAY=ON");
+    digitalWrite(RELAY,LOW);
+    value = LOW;
+  }
+  if (request.indexOf("/RELAY=OFF") != -1)  
+  {
+    Serial.println("RELAY=OFF");
+    digitalWrite(RELAY,HIGH);
+    value = HIGH;
+  }
+ 
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: text/html");
+  client.println(""); 
+  client.println("<!DOCTYPE HTML>");
+  client.println("<html>");
+  client.println("<head><title>ESP8266 RELAY Control</title></head>");
+  client.print("Relay is now: ");
+ 
+  if(value == HIGH) 
+  {
+    client.print("OFF");
+  } 
+  else 
+  {
+    client.print("ON");
+  }
+  client.println("<br><br>");
+  client.println("Turn <a href=\"/RELAY=OFF\">OFF</a> RELAY<br>");
+  client.println("Turn <a href=\"/RELAY=ON\">ON</a> RELAY<br>");
+    client.println("</html>");
+ 
+  delay(1);
+  Serial.println("Client disonnected");
+  Serial.println("");  
+
+}
