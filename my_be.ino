@@ -18,8 +18,8 @@ const char* password = "";
 
 
 //====Telegram=========================
-String BOTtoken = "7125055805:AAGm9c3MUZGsVXLV5Dgmxt914hTJ47bz1Lg";
-String CHAT_ID = "521188043";
+String BOTtoken = "";
+String CHAT_ID = "";
 X509List cert(TELEGRAM_CERTIFICATE_ROOT);
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
